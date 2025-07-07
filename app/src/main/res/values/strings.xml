@@ -7,4 +7,14 @@
     <string name="hello_world">From the Square world,\nHello, %1$s!</string>
     <string name="tile_label">Example tile</string>
     <string name="complication_label">Example complication</string>
+    <string name="_00">00</string>
+    <string name="pulso_actual">Pulso actual</string>
+    <string name="alert">!</string>
+    <string name="ppm">ppm</string>
+    <string name="historial_de_npulso">Historial de\npulso</string>
+    <string name="alerta">Alerta</string>
+    <string name="_Alerta" />
+    <string name="_historial" />
+    <string name="_0">00</string>
+    <string name="ac">AC</string>
 </resources>

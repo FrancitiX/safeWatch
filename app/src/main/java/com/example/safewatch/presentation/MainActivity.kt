@@ -25,20 +25,96 @@ import androidx.wear.compose.material.TimeText
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.example.safewatch.R
 import com.example.safewatch.presentation.theme.SafeWatchTheme
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.util.Log
+import android.widget.TextView
+import androidx.core.app.ActivityCompat
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), SensorEventListener {
+
+    private lateinit var sensorManager: SensorManager
+    private var heartRateSensor: Sensor? = null
+    private lateinit var pulseTextView: TextView
+    private var sensorType=Sensor.TYPE_HEART_RATE
+    private var sensor:Sensor? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
-        setTheme(android.R.style.Theme_DeviceDefault)
+       // setTheme(android.R.style.Theme_DeviceDefault)
 
-        setContent {
-            WearApp("Android")
+        setContentView(R.layout.main)
+
+        pulseTextView = findViewById(R.id.Pulse)
+
+        // Obtener el SensorManager y el sensor de pulso
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE)
+        sensor=sensorManager.getDefaultSensor(sensorType)
+
+        startSensor()
+        if (heartRateSensor == null) {
+            Log.e("Sensor", "Sensor de pulso no disponible")
+            pulseTextView.text = "No disponible"
         }
     }
+
+    private fun startSensor() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BODY_SENSORS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.BODY_SENSORS), 1001)
+            return
+        }
+        if (sensor != null) {
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Registrar el listener del sensor
+        heartRateSensor?.also {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Detener el sensor cuando no esté en uso
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event?.sensor?.type == Sensor.TYPE_HEART_RATE) {
+            val bpm = event.values[0].toInt()
+            Log.d("Pulso", "Frecuencia: $bpm")
+            pulseTextView.text = bpm.toString()
+
+            val color = when {
+                bpm < 50 -> android.graphics.Color.rgb(255, 255, 255)
+                bpm > 200 -> android.graphics.Color.RED
+                bpm > 150 -> android.graphics.Color.rgb(255, 165, 0)
+                bpm > 100 -> android.graphics.Color.YELLOW
+                else -> android.graphics.Color.parseColor("#52A3FF")
+            }
+
+            pulseTextView.setTextColor(color)
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // No necesario para este caso
+    }
 }
+
+
 
 @Composable
 fun WearApp(greetingName: String) {
