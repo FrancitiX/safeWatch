@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "SafeWatch"
 include(":app")
 include(":app:safewatch")
+include(":safewatch")

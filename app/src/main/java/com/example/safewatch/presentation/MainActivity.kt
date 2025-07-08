@@ -27,14 +27,19 @@ import com.example.safewatch.R
 import com.example.safewatch.presentation.theme.SafeWatchTheme
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.example.safewatch.Auth.sendAlert
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -60,10 +65,24 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE)
         sensor=sensorManager.getDefaultSensor(sensorType)
 
+        val history: ImageButton = findViewById(R.id.history)
+        val alert: ImageButton = findViewById(R.id.alert)
+
         startSensor()
         if (heartRateSensor == null) {
             Log.e("Sensor", "Sensor de pulso no disponible")
             pulseTextView.text = "No disponible"
+        }
+
+        history.setOnClickListener {
+            //Toast.makeText(this,"Hola mundo", Toast.LENGTH_SHORT -10).show()
+            val intent = Intent(this@MainActivity, History::class.java)
+            startActivity(intent)
+        }
+
+        alert.setOnClickListener{
+            val intent = Intent(this@MainActivity, Alarm::class.java)
+            startActivity(intent)
         }
     }
 
