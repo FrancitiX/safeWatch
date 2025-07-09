@@ -56,16 +56,21 @@ fun sendAlert(
 }
 
 
-fun getHistory() {
-    val json = """
-       {
-          "user": "Francisco",
-       }
-       """.trimIndent()
+fun getHistory(user: String, onResult: (Boolean, String?) -> Unit) {
+    val json = JSONObject()
+    json.put("user", user)
+
+    val url = HttpUrl.Builder()
+        .scheme("http")
+        .host("192.168.0.104")
+        .port(3000)
+        .addPathSegment("getRegistrations")
+        .addQueryParameter("user", "Francisco")
+        .build()
 
     val request = Request.Builder()
-        .url(DB_URI + "getRegistrations")
-        .post(RequestBody.create("application/json".toMediaType(), json))
+        .url(url)
+        .get()
         .build()
 
     client.newCall(request).enqueue(object : Callback {
@@ -74,12 +79,18 @@ fun getHistory() {
         }
 
         override fun onResponse(call: Call, response: Response) {
-            val json = response.body?.string()
-            if (json != null) {
-                val jsonObject = JSONObject(json)
-                Log.d("HTTP", "Dato recibido: $jsonObject")
+            val responseBody = response.body?.string()
+            if (response.isSuccessful && responseBody != null) {
+                try {
+                    val jsonResponse = JSONObject(responseBody)
+                    val data = jsonResponse.optString("data")
+                    onResult(true, data)
+                } catch (e: Exception) {
+                    onResult(false, null)
+                }
             } else {
-                Log.e("HTTP", "El cuerpo de la respuesta es nulo")
+                Log.e("Error al obtener el Historial", response.message)
+                onResult(false, null)
             }
         }
     })

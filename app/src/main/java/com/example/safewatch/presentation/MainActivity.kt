@@ -5,6 +5,7 @@
 
 package com.example.safewatch.presentation
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,6 +34,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
@@ -44,11 +47,14 @@ import com.example.safewatch.Auth.sendAlert
 class MainActivity : ComponentActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
-    private var heartRateSensor: Sensor? = null
     private lateinit var pulseTextView: TextView
-    private var sensorType=Sensor.TYPE_HEART_RATE
+    private lateinit var accelerometerTextView: TextView
+    private var heartRateSensor: Sensor? = null
+    private var accelerometer: Sensor? = null
+    private var gyroscope: Sensor? = null
     private var sensor:Sensor? = null
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
@@ -59,11 +65,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         setContentView(R.layout.main)
 
         pulseTextView = findViewById(R.id.Pulse)
+        accelerometerTextView = findViewById(R.id.accelerometer)
 
         // Obtener el SensorManager y el sensor de pulso
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE)
-        sensor=sensorManager.getDefaultSensor(sensorType)
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
         val history: ImageButton = findViewById(R.id.history)
         val alert: ImageButton = findViewById(R.id.alert)
@@ -91,7 +99,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.BODY_SENSORS), 1001)
             return
         }
-        if (sensor != null) {
+        if (heartRateSensor != null) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
@@ -111,9 +119,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
+        var bpm: Int = 0
+        var ac: Int = 0
+        var gyr: Int = 0
         if (event?.sensor?.type == Sensor.TYPE_HEART_RATE) {
-            val bpm = event.values[0].toInt()
-            Log.d("Pulso", "Frecuencia: $bpm")
+            bpm = event.values[0].toInt()
+            //Log.d("Pulso", "Frecuencia: $bpm")
             pulseTextView.text = bpm.toString()
 
             val color = when {
@@ -125,6 +136,35 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             }
 
             pulseTextView.setTextColor(color)
+        }
+
+        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
+            val ac = event.values[0].toInt()
+            Log.d("Aceleración", "Frecuencia: $ac")
+            accelerometerTextView.text = ac.toString()
+        }
+
+        if (event?.sensor?.type == Sensor.TYPE_GYROSCOPE) {
+            gyr = event.values[0].toInt()
+            Log.d("Giroscopio", "Frecuencia: $gyr")
+        }
+
+        if (bpm > 100) {
+            sendAlert("Francisco", "Alto ritmo caridaco") { success, message ->
+                if (success) {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Alerta enviada con exito", Toast.LENGTH_SHORT -10).show()
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "¡Ocurrio un error inesperado!",
+                            Toast.LENGTH_SHORT - 10
+                        ).show()
+                    }
+                }
+            }
         }
     }
 
