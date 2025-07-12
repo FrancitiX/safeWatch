@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_color">
+
+    <FrameLayout
+        android:id="@+id/Nav"
+        android:layout_width="match_parent"
+        android:paddingTop="30dp"
+        android:layout_height="85dp"
+        android:background="@drawable/nav_background">
+
+        <TextView
+            android:id="@+id/Title"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center"
+            android:maxWidth="300dp"
+            android:text="@string/safewatch"
+            android:textColor="#FFFFFF"
+            android:textFontWeight="800"
+            android:textSize="30sp"
+            android:layout_marginLeft="20dp"
+            tools:ignore="RtlHardcoded" />
+
+        <ImageButton
+            android:id="@+id/profile"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="right|center"
+            android:layout_marginRight="15dp"
+            android:scaleType="center"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            android:src="@drawable/account_circle_24"
+            tools:ignore="RtlHardcoded"
+            android:background="#00000000"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/nav_separator" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/Container"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/bg_subtitle">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="230dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center"
+            android:maxWidth="300dp"
+            android:text="@string/registros_de_alertas"
+            android:textSize="23sp"
+            android:textFontWeight="500"
+            android:textColor="#DEDEDE"
+            android:layout_marginLeft="20dp"
+            tools:ignore="RtlHardcoded" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/noHistory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:maxWidth="300dp"
+        android:text="@string/sin_historial_de_alertas"
+        android:textSize="23sp"
+        android:textFontWeight="500"
+        android:textColor="#DEDEDE"
+        android:textAlignment="center"
+        tools:ignore="RtlHardcoded"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/Carga"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="240dp"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:src="@drawable/carga"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/email"
+        app:layout_constraintVertical_bias="0.162" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/registroRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="vertical"
+            />
+    </ScrollView>
+
+</LinearLayout>
+

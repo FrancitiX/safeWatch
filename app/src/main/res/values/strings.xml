@@ -20,4 +20,5 @@
     <string name="cancelar">Cancelar</string>
     <string name="ok">ok</string>
     <string name="esta_seguro_de_enviar_la_alarma">Esta seguro de enviar la alarma?</string>
+    <string name="no_volver_a_mostrar">No volver a mostrar</string>
 </resources>

@@ -42,9 +42,24 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.example.safewatch.Auth.InternalData
+import com.example.safewatch.Auth.UserConfig
 import com.example.safewatch.Auth.sendAlert
+import com.example.safewatch.Auth.sendMessageToPhone
+import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity(), SensorEventListener {
+
+    private lateinit var config: UserConfig
+    private lateinit var localStorage: InternalData
+
+    val newConfig = UserConfig(
+        "Francisco",
+        "",
+        180,
+        50,
+        false
+    )
 
     private lateinit var sensorManager: SensorManager
     private lateinit var pulseTextView: TextView
@@ -53,14 +68,31 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var accelerometer: Sensor? = null
     private var gyroscope: Sensor? = null
     private var sensor:Sensor? = null
+    var numTry: Int = 0
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-
         super.onCreate(savedInstanceState)
 
-       // setTheme(android.R.style.Theme_DeviceDefault)
+        localStorage = InternalData(this)
+
+        val loadedConfig = localStorage.getData()
+        config = if (loadedConfig != null) {
+            loadedConfig
+        } else {
+            val defaultConfig = UserConfig(
+                username = "Francisco",
+                email = "ortizmedinajosefrancisco@gmail.com",
+                maxBpm = 180,
+                minBpm = 50,
+                recAlert = false
+            )
+            localStorage.save(defaultConfig)
+            defaultConfig
+        }
+        Log.d("Nose1", config.toString())
+        // setTheme(android.R.style.Theme_DeviceDefault)
 
         setContentView(R.layout.main)
 
@@ -89,8 +121,31 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
 
         alert.setOnClickListener{
-            val intent = Intent(this@MainActivity, Alarm::class.java)
-            startActivity(intent)
+            if (config.recAlert) {
+                sendAlert(config.username, config.email, "Alerta manual") { success, message ->
+                    if (success) {
+                        sendMessageToPhone("/alerta", "¡Pulso alto!", this)
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Alerta enviada con exito",
+                                Toast.LENGTH_SHORT - 10
+                            ).show()
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "¡Ocurrio un error inesperado!",
+                                Toast.LENGTH_SHORT - 10
+                            ).show()
+                        }
+                    }
+                }
+            } else {
+                val intent = Intent(this@MainActivity, Alarm::class.java)
+                startActivity(intent)
+            }
         }
     }
 
@@ -118,6 +173,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         sensorManager.unregisterListener(this)
     }
 
+    @SuppressLint("DefaultLocale")
     override fun onSensorChanged(event: SensorEvent?) {
         var bpm: Int = 0
         var ac: Int = 0
@@ -139,9 +195,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
 
         if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            val ac = event.values[0].toInt()
-            Log.d("Aceleración", "Frecuencia: $ac")
-            accelerometerTextView.text = ac.toString()
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+
+            val acceleration = sqrt((x * x) + (y * y) + (z * z))
+
+            Log.d("Acelerómetro", "X: $x, Y: $y, Z: $z, Total: $acceleration")
+            accelerometerTextView.text = String.format("%.2f m/s²", acceleration)
         }
 
         if (event?.sensor?.type == Sensor.TYPE_GYROSCOPE) {
@@ -149,13 +210,16 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             Log.d("Giroscopio", "Frecuencia: $gyr")
         }
 
-        if (bpm > 100) {
-            sendAlert("Francisco", "Alto ritmo caridaco") { success, message ->
+        if (numTry == 0 && (bpm > 100 ) || (bpm < config.minBpm && bpm > 1)) {
+            sendMessageToPhone("/alerta", "¡Pulso alto!", this)
+            sendAlert(config.username, "ortizmedinajosefrancisco@gmail.com", "Alto ritmo caridaco") { success, message ->
                 if (success) {
+                    numTry ++
                     runOnUiThread {
                         Toast.makeText(this@MainActivity, "Alerta enviada con exito", Toast.LENGTH_SHORT -10).show()
                     }
                 } else {
+                    numTry = 0
                     runOnUiThread {
                         Toast.makeText(
                             this@MainActivity,
@@ -172,8 +236,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         // No necesario para este caso
     }
 }
-
-
 
 @Composable
 fun WearApp(greetingName: String) {

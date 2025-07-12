@@ -25,7 +25,7 @@ class History: ComponentActivity() {
 
         setContentView(R.layout.history)
 
-        getHistory("Francisco") { success, message ->
+        getHistory("Francisco", "ortizmedinajosefrancisco@gmail.com") { success, message ->
             if (success) {
                 //Log.d("Resultado", message.toString())
                 val jsonArray = JSONArray(message)
