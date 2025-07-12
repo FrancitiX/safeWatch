@@ -200,6 +200,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val z = event.values[2]
 
             val acceleration = sqrt((x * x) + (y * y) + (z * z))
+            ac = acceleration.toInt()
 
             Log.d("Acelerómetro", "X: $x, Y: $y, Z: $z, Total: $acceleration")
             accelerometerTextView.text = String.format("%.2f m/s²", acceleration)
