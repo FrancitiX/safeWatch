@@ -157,6 +157,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         if (heartRateSensor != null) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
+        accelerometer?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+        gyroscope?.let {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
     }
 
     override fun onResume() {
@@ -198,12 +204,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val x = event.values[0]
             val y = event.values[1]
             val z = event.values[2]
+            val preAc = sqrt(((x * x + x) + (y * y + y) + (z * z)).toDouble())
+            ac = preAc.toInt() - 9
 
-            val acceleration = sqrt((x * x) + (y * y) + (z * z))
-            ac = acceleration.toInt()
-
-            Log.d("Acelerómetro", "X: $x, Y: $y, Z: $z, Total: $acceleration")
-            accelerometerTextView.text = String.format("%.2f m/s²", acceleration)
+            //Log.d("Acelerómetro", "X: $x, Y: $y, Z: $z, Total: $preAc")
+            accelerometerTextView.text = ac.toString()
         }
 
         if (event?.sensor?.type == Sensor.TYPE_GYROSCOPE) {

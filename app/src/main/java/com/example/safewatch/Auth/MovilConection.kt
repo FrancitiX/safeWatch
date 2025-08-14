@@ -15,10 +15,8 @@ fun sendMessageToPhone(path: String, message: String, context: Context) {
             messageClient.sendMessage(node.id, path, message.toByteArray())
                 .addOnSuccessListener {
                     Log.d("Wear", "Mensaje enviado al teléfono con éxito")
-                }
-                .addOnFailureListener {
-                    Log.e("Wear", "Error al enviar mensaje al teléfono", it)
-                }
-            }
+                }.addOnFailureListener {
+                    Log.e("Wear", "Error al enviar mensaje al teléfono", it) }
         }
     }
+}

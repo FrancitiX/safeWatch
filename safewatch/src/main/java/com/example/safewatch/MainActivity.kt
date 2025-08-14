@@ -39,7 +39,6 @@ import com.bumptech.glide.Glide
 import com.example.safewatch.ui.theme.SafeWatchTheme
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.math.log
 
 class MainActivity : ComponentActivity() {
     private lateinit var config: UserConfig
